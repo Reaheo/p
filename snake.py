@@ -8,7 +8,7 @@ def start_snake():
     Startet das Snake-Game, indem die Hauptschleife des Spiels aufgerufen wird.
     """
     # Geschwindigkeit
-    delay = 0.05
+    delay = 0.3
 
     # Bildschirm für das Snake-Game
     window = turtle.Screen()
@@ -101,10 +101,14 @@ def start_snake():
     head_down = "snakehead_down.gif"
     head_left = "snakehead_left.gif"
     head_right = "snakehead_right.gif"
+    body_horizontal = "snakebody_horizontal.gif"
+    body_vertical = "snakebody_vertical.gif"
     window.addshape(head_up)
     window.addshape(head_down)
     window.addshape(head_left)
     window.addshape(head_right)
+    window.addshape(body_horizontal)
+    window.addshape(body_vertical)
 
     # Der Kopf der Schlange
     head = turtle.Turtle()
@@ -128,6 +132,7 @@ def start_snake():
         Der Kopf bewegt sich in Richtung seiner Ausrichtung head.direction. Hier wird die Bewegung
         bei jeweiliger Ausrichtung gemacht, indem die y-Koordinate oder x-Koordinate verändert wird.
         """
+        global vertical
         if head.direction == "up":
             head.sety(head.ycor() + 20)
             head.shape(head_up)
@@ -206,12 +211,13 @@ def start_snake():
 
             # Die Schlange wird länger durch das Essen eines Apfels
             new_bodysegment = turtle.Turtle()
-            new_bodysegment.shape("square")
-            new_bodysegment.penup()
-            new_bodysegment.color("grey")
             new_bodysegment.direction = head.direction
+            new_bodysegment.penup()
+            new_bodysegment.shape(body_vertical)
+            new_bodysegment.color("grey")
             new_bodysegment.speed(0)
             bodysegments.append(new_bodysegment)
+            
 
         for i in range(len(bodysegments)-1, 0, -1):
             """
@@ -230,6 +236,11 @@ def start_snake():
             x = head.xcor()
             y = head.ycor()
             bodysegments[0].goto(x,y)
+            bodysegments[0].direction = head.direction
+            if bodysegments[0].direction == "left" or bodysegments[0].direction == "right":
+                bodysegments[0].shape(body_horizontal)
+            else:
+                bodysegments[0].shape(body_vertical)
 
         # Kollision mit Rand
         if (head.xcor() == -500) or (head.xcor() == 500) or (head.ycor() == -300) or (head.ycor() == 300):
