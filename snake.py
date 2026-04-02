@@ -318,3 +318,21 @@ def start_snake():
         die bisher einzel stehen wäre hilfreich
 
         """
+
+        """
+        def Reset():
+            head.direction = "Stop"
+            time.sleep(1)
+        
+            for segment in bodysegments:
+                segment.goto(2000, 2000)
+
+            bodysegments.clear()
+            head.goto(0,0)
+
+            accepting_inputs = False
+            input_buffer.clear()
+            window.ontimer(enable_inputs, 1000)
+
+            window.ontimer(time.sleep, 1000)
+        """
