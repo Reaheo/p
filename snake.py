@@ -1,14 +1,18 @@
-import turtle # Modul für die Grafik
+import turtle # Modul fuer die Grafik
 import random
 import time
-import collections # Zum Erstellen eines Input-Buffer, wo sich Eingaben gemerkt werden für ein besseres Spielgefühl
+import collections # Zum Erstellen eines Input-Buffer, wo sich Eingaben gemerkt werden für ein besseres Spielgefuehl
 
 def start_snake():
     """
     Startet das Snake-Game, indem die Hauptschleife des Spiels aufgerufen wird.
     """
+
+    # Da alles in einer Funktion, Variablen verhalten sich manchmal komisch
+    state = {"accepting_inputs": True, "resetting": False}
+
     # Geschwindigkeit
-    delay = 0.3
+    delay = 0.1
 
     # Bildschirm für das Snake-Game
     window = turtle.Screen()
@@ -77,12 +81,12 @@ def start_snake():
 
     quit_label = turtle.Turtle()
     quit_label.penup()
-    quit_label.shape(quitlabel) # Überschrift, die "Bewegung" liest
+    quit_label.shape(quitlabel) # Ueberschrift, die "Bewegung" liest
     quit_label.goto(300,200)
 
     escape_button = turtle.Turtle()
     escape_button.penup()
-    escape_button.shape(escape_key) # Überschrift, die "Bewegung" liest
+    escape_button.shape(escape_key) # Ueberschrift, die "Bewegung" liest
     escape_button.goto(300,-100)
 
     def disable_tipps():
@@ -101,14 +105,12 @@ def start_snake():
     head_down = "snakehead_down.gif"
     head_left = "snakehead_left.gif"
     head_right = "snakehead_right.gif"
-    body_horizontal = "snakebody_horizontal.gif"
-    body_vertical = "snakebody_vertical.gif"
+    body = "snakebody.gif"
     window.addshape(head_up)
     window.addshape(head_down)
     window.addshape(head_left)
     window.addshape(head_right)
-    window.addshape(body_horizontal)
-    window.addshape(body_vertical)
+    window.addshape(body)
 
     # Der Kopf der Schlange
     head = turtle.Turtle()
@@ -119,18 +121,13 @@ def start_snake():
     head.direction = "Stop"
 
     # Input Buffer
-    input_buffer = collections.deque(maxlen=2) # Warteschlange, die maximal zwei Elemente hält und pro Frame eins abarbeitet
-
-    def enable_inputs():
-        global accepting_inputs
-        accepting_inputs = True
-
+    input_buffer = collections.deque(maxlen=2) # Warteschlange, die maximal zwei Elemente haelt und pro Frame eins abarbeite
 
     # Bewegungsfunktionen
     def move():
         """
         Der Kopf bewegt sich in Richtung seiner Ausrichtung head.direction. Hier wird die Bewegung
-        bei jeweiliger Ausrichtung gemacht, indem die y-Koordinate oder x-Koordinate verändert wird.
+        bei jeweiliger Ausrichtung gemacht, indem die y-Koordinate oder x-Koordinate veraendert wird.
         """
         global vertical
         if head.direction == "up":
@@ -147,24 +144,23 @@ def start_snake():
             head.shape(head_left)
 
         # Ausrichtung des Kopfes
-    accepting_inputs = True
     def upward():
-        if accepting_inputs == False:
+        if state["accepting_inputs"] == False:
             return
         input_buffer.append("up")
         disable_tipps()
     def downward():
-        if accepting_inputs == False:
+        if state["accepting_inputs"] == False:
             return
         input_buffer.append("down")
         disable_tipps()
     def rightward():
-        if accepting_inputs == False:
+        if state["accepting_inputs"] == False:
             return
         input_buffer.append("right")
         disable_tipps()
     def leftward():
-        if accepting_inputs == False:
+        if state["accepting_inputs"] == False:
             return
         input_buffer.append("left")
         disable_tipps()
@@ -176,15 +172,37 @@ def start_snake():
     window.onkeypress(rightward, "d")
     window.onkeypress(leftward,"a")
 
-    # Die Äpfel
+    # Die Aepfel
     apple = turtle.Turtle()
     apple.shape(appleshape)
     apple.penup()
     apple.shapesize(stretch_wid=1,stretch_len=1)
     apple.goto(0, 100)
 
-    # Körperteile
+    # Koerperteile
     bodysegments = []
+
+    # Spiel zuruecksetzen
+    def reset():
+        if state["resetting"]:
+            return
+        state["resetting"] = True
+        state["accepting_inputs"] = False
+        input_buffer.clear()
+        head.direction = "Stop"
+
+        def cleanup():
+            for segment in bodysegments:
+                segment.goto(2000, 2000)
+            bodysegments.clear()
+
+            head.goto(0, 0)
+            head.shape(head_up)
+
+            state["resetting"] = False
+            state["accepting_inputs"] = True
+
+        window.ontimer(cleanup, 1000)
 
     # Haupt Spielschleife
     running = True
@@ -203,18 +221,17 @@ def start_snake():
         # Apfel essen
         if head.distance(apple) < 20:
             while True:
-                # Wenn der Abstand vom Apfel weniger ist als ein Kästchen, dann wird dieser gegessen
+                # Wenn der Abstand vom Apfel weniger ist als ein Kaestchen, dann wird dieser gegessen
                 apple.goto(random.randint(-24,24)*20,random.randint(-14,14)*20)
                 if not any(apple.position() == segment.position() for segment in bodysegments):
                     apple.goto(random.randint(-24,24)*20,random.randint(-14,14)*20)
                     break
 
-            # Die Schlange wird länger durch das Essen eines Apfels
+            # Die Schlange wird laenger durch das Essen eines Apfels
             new_bodysegment = turtle.Turtle()
-            new_bodysegment.direction = head.direction
+            new_bodysegment.shape(body)
             new_bodysegment.penup()
-            new_bodysegment.shape(body_vertical)
-            new_bodysegment.color("grey")
+            new_bodysegment.direction = head.direction
             new_bodysegment.speed(0)
             bodysegments.append(new_bodysegment)
             
@@ -225,14 +242,14 @@ def start_snake():
             und y-Koordinate auf das davor liegende gesetzt 
             und dort bewegt sich es auch hin.
 
-            Körperteil 4 würde sich auf 4 - 1 bewegen, also 3 usw.
+            Koerperteil 4 wuerde sich auf 4 - 1 bewegen, also 3 usw.
             """ 
             x = bodysegments[i-1].xcor()
             y = bodysegments[i-1].ycor()
             bodysegments[i].goto(x,y)
 
         if len(bodysegments) > 0:
-            # Das erste Körpersegment, nicht gleich der Kopf, wird hier bewegt.
+            # Das erste Koerpersegment, nicht gleich der Kopf, wird hier bewegt.
             x = head.xcor()
             y = head.ycor()
             bodysegments[0].goto(x,y)
@@ -244,60 +261,22 @@ def start_snake():
 
         # Kollision mit Rand
         if (head.xcor() == -500) or (head.xcor() == 500) or (head.ycor() == -300) or (head.ycor() == 300):
-            head.direction = "Stop"
-            time.sleep(1)
-
-            for segment in bodysegments:
-                    segment.goto(2000, 2000)
-
-            bodysegments.clear()
-            head.goto(0,0)
-
-            accepting_inputs = False
-            input_buffer.clear()
-            window.ontimer(enable_inputs, 1000)
-
-
+            reset()
 
         move()
-    
         
-        # Kollision mit eigenen Snake-Körper
+        # Kollision mit eigenen Snake-Koerper
         for segment in bodysegments:
             if segment.distance(head) < 20:
-                head.direction = "Stop"
-                time.sleep(1)
-            
-                for segment in bodysegments:
-                    segment.goto(2000, 2000)
+                reset()
 
-                bodysegments.clear()
-                head.goto(0,0)
-
-                accepting_inputs = False
-                input_buffer.clear()
-                window.ontimer(enable_inputs, 1000)
-                 
-                
-
-        # Für den sehr unwahrscheinlichen Fall, dass die Schlange die maximale Länge erreicht von 49 * 29, also das, was das Fenster halten kann.
+        # Fuer den sehr unwahrscheinlichen Fall, dass die Schlange die maximale Laenge erreicht von 49 * 29
         if len(bodysegments) >= 1421:
-            head.direction = "Stop"
-            time.sleep(1)
-            
-            for segment in bodysegments:
-                segment.goto(2000, 2000)
-
-            bodysegments.clear()
-            head.goto(0,0)
-
-            accepting_inputs = False
-            input_buffer.clear()
-            window.ontimer(enable_inputs, 1000)
+            reset()
 
             victory = turtle.Turtle()
             victory.penup()
-            victory.shape(victory_label) # Überschrift, die "Bewegung" liest
+            victory.shape(victory_label)
             victory.goto(0,100)
             window.ontimer(victory.hideturtle, 3000)
 
@@ -312,27 +291,3 @@ def start_snake():
         window.onkeypress(beenden, "Escape")
 
         window.update()
-
-        """
-        Statt time.sleep() eine Funktion einfügen die einen Reset durchführt. Ein Hilfsfunktion, die alle Vörgänge durchführt, 
-        die bisher einzel stehen wäre hilfreich
-
-        """
-
-        """
-        def Reset():
-            head.direction = "Stop"
-            time.sleep(1)
-        
-            for segment in bodysegments:
-                segment.goto(2000, 2000)
-
-            bodysegments.clear()
-            head.goto(0,0)
-
-            accepting_inputs = False
-            input_buffer.clear()
-            window.ontimer(enable_inputs, 1000)
-
-            window.ontimer(time.sleep, 1000)
-        """
