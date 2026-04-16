@@ -10,6 +10,7 @@ def start_snake():
 
     # Da alles in einer Funktion, Variablen verhalten sich manchmal komisch
     state = {"accepting_inputs": True, "resetting": False}
+    running = True
 
     # Geschwindigkeit
     delay = 0.1
@@ -18,6 +19,14 @@ def start_snake():
     window = turtle.Screen()
     window.colormode(255)
     window.bgcolor(80,230,120)
+
+    def close_snake():
+        nonlocal running
+        if running:
+            running = False
+            window.bye()
+
+    window.getcanvas().winfo_toplevel().protocol("WM_DELETE_WINDOW", close_snake)
     window.setup(width=1000, height=600)
     window.tracer(0)
 
@@ -129,7 +138,6 @@ def start_snake():
         Der Kopf bewegt sich in Richtung seiner Ausrichtung head.direction. Hier wird die Bewegung
         bei jeweiliger Ausrichtung gemacht, indem die y-Koordinate oder x-Koordinate veraendert wird.
         """
-        global vertical
         if head.direction == "up":
             head.sety(head.ycor() + 20)
             head.shape(head_up)
@@ -171,6 +179,13 @@ def start_snake():
     window.onkeypress(downward, "s")
     window.onkeypress(rightward, "d")
     window.onkeypress(leftward,"a")
+
+    def beenden():
+        nonlocal running
+        running = False
+        window.bye()
+
+    window.onkeypress(beenden, "Escape")
 
     # Die Aepfel
     apple = turtle.Turtle()
@@ -234,7 +249,6 @@ def start_snake():
             new_bodysegment.direction = head.direction
             new_bodysegment.speed(0)
             bodysegments.append(new_bodysegment)
-            
 
         for i in range(len(bodysegments)-1, 0, -1):
             """
@@ -253,11 +267,6 @@ def start_snake():
             x = head.xcor()
             y = head.ycor()
             bodysegments[0].goto(x,y)
-            bodysegments[0].direction = head.direction
-            if bodysegments[0].direction == "left" or bodysegments[0].direction == "right":
-                bodysegments[0].shape(body_horizontal)
-            else:
-                bodysegments[0].shape(body_vertical)
 
         # Kollision mit Rand
         if (head.xcor() == -500) or (head.xcor() == 500) or (head.ycor() == -300) or (head.ycor() == 300):
@@ -281,13 +290,4 @@ def start_snake():
             window.ontimer(victory.hideturtle, 3000)
 
         time.sleep(delay)
-
-        def beenden():
-            nonlocal running
-            running = False
-            window.bye()
-
-        window.listen()
-        window.onkeypress(beenden, "Escape")
-
         window.update()
