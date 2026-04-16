@@ -129,6 +129,7 @@ def start_snake():
         Der Kopf bewegt sich in Richtung seiner Ausrichtung head.direction. Hier wird die Bewegung
         bei jeweiliger Ausrichtung gemacht, indem die y-Koordinate oder x-Koordinate veraendert wird.
         """
+        global vertical
         if head.direction == "up":
             head.sety(head.ycor() + 20)
             head.shape(head_up)
@@ -233,6 +234,7 @@ def start_snake():
             new_bodysegment.direction = head.direction
             new_bodysegment.speed(0)
             bodysegments.append(new_bodysegment)
+            
 
         for i in range(len(bodysegments)-1, 0, -1):
             """
@@ -251,6 +253,11 @@ def start_snake():
             x = head.xcor()
             y = head.ycor()
             bodysegments[0].goto(x,y)
+            bodysegments[0].direction = head.direction
+            if bodysegments[0].direction == "left" or bodysegments[0].direction == "right":
+                bodysegments[0].shape(body_horizontal)
+            else:
+                bodysegments[0].shape(body_vertical)
 
         # Kollision mit Rand
         if (head.xcor() == -500) or (head.xcor() == 500) or (head.ycor() == -300) or (head.ycor() == 300):
