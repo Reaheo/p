@@ -9,7 +9,10 @@ def start_snake():
     """
 
     # Da alles in einer Funktion, Variablen verhalten sich manchmal komisch
-    state = {"accepting_inputs": True, "resetting": False}
+    state = {
+        "accepting_inputs": True, 
+        "resetting": False
+        }
 
     # Geschwindigkeit
     delay = 0.1
@@ -47,6 +50,55 @@ def start_snake():
         
     snake_background()
 
+    # Punkte
+    point_variables = {
+                    "count": 0,
+                    }
+
+    points = turtle.Turtle()
+    points.hideturtle()
+    points.penup()
+    points.goto(-350, 250)
+    points.color("white")
+    points.write("Punkte: ", move=False, align="center", font=("Abaddon", 20, "bold"))
+
+    count_display = turtle.Turtle()
+    count_display.hideturtle()
+    count_display.penup()
+    count_display.goto(-290, 250)
+    count_display.color("white")
+    count_display.write("0", move=False, align="center", font=("Abaddon", 20, "bold"))
+
+    highscore = collections.deque(maxlen=2)
+
+    highscore_label = turtle.Turtle()
+    highscore_label.hideturtle()
+    highscore_label.penup()
+    highscore_label.goto(290, 250)
+    highscore_label.color("white")
+    highscore_label.write("Highscore: ", move=False, align="center", font=("Abaddon", 20, "bold"))
+
+    highscore_display = turtle.Turtle()
+    highscore_display.hideturtle()
+    highscore_display.penup()
+    highscore_display.goto(380, 250)
+    highscore_display.color("white")
+    highscore_display.write("0", move=False, align="center", font=("Abaddon", 20, "bold"))
+
+    def find_highscore(highscore, count):
+        highscore.append(point_variables["count"])
+        if len(highscore) == 2:
+            if highscore[0] < highscore[1]:
+                highscore.popleft()
+
+            else:
+                highscore.pop()
+
+    def give_points(point_variables):
+        point_variables["count"] += 1
+        count_display.clear()
+        count_display.write(point_variables["count"], move=False, align="center", font=("Abaddon", 20, "bold"))
+
     # Bilder bzw. Formen
     appleshape = "Aepfel.gif"
     window.addshape(appleshape)
@@ -70,24 +122,24 @@ def start_snake():
     movement_label = turtle.Turtle()
     movement_label.penup()
     movement_label.shape(movementlabel) # Überschrift, die "Bewegung" liest
-    movement_label.goto(-300,200)
+    movement_label.goto(-300,150)
 
     tipps_movement = turtle.Turtle()
     tipps_movement.penup()
     tipps_movement.shape(movementkeys) # Abbildung, die die Tasten darstellt und ihre Richtung
-    tipps_movement.goto(-300,-100)
+    tipps_movement.goto(-300,-150)
 
     # Rechts: Anzeige, die einem sagt, dass man mit der "Escape"-Taste das Spiel verlassen kann
 
     quit_label = turtle.Turtle()
     quit_label.penup()
     quit_label.shape(quitlabel) # Ueberschrift, die "Bewegung" liest
-    quit_label.goto(300,200)
+    quit_label.goto(300,170)
 
     escape_button = turtle.Turtle()
     escape_button.penup()
     escape_button.shape(escape_key) # Ueberschrift, die "Bewegung" liest
-    escape_button.goto(300,-100)
+    escape_button.goto(300,-150)
 
     def disable_tipps():
         # Prozedur, damit wenn eine die Schlange beginnt sich zu bewegen, die eingeblendeten Bilder verschwinden
@@ -176,7 +228,7 @@ def start_snake():
     apple.shape(appleshape)
     apple.penup()
     apple.shapesize(stretch_wid=1,stretch_len=1)
-    apple.goto(0, 100)
+    apple.goto(0, 60)
 
     # Koerperteile
     bodysegments = []
@@ -201,6 +253,15 @@ def start_snake():
             state["resetting"] = False
             state["accepting_inputs"] = True
 
+            point_variables["count"] = 0
+            count_display.clear()
+            count_display.write("0", move=False, align="center", font=("Abaddon", 20, "bold"))
+
+            highscore_display.clear()
+            highscore_display.write(highscore[0], move=False, align="center", font=("Abaddon", 20, "bold"))
+
+            
+
         window.ontimer(cleanup, 1000)
 
     # Haupt Spielschleife
@@ -219,6 +280,7 @@ def start_snake():
 
         # Apfel essen
         if head.distance(apple) < 20:
+            give_points(point_variables)
             while True:
                 # Wenn der Abstand vom Apfel weniger ist als ein Kaestchen, dann wird dieser gegessen
                 apple.goto(random.randint(-24,24)*20,random.randint(-14,14)*20)
@@ -247,7 +309,7 @@ def start_snake():
             bodysegments[i].goto(x,y)
 
         if len(bodysegments) > 0:
-            # Das erste Koerpersegment, nicht gleich der Kopf, wird hier bewegt.
+            # Das erste Koerpersegment, das direkt hinter dem Kopf, wird hier bewegt.
             x = head.xcor()
             y = head.ycor()
             bodysegments[0].goto(x,y)
@@ -255,13 +317,14 @@ def start_snake():
         # Kollision mit Rand
         if (head.xcor() == -500) or (head.xcor() == 500) or (head.ycor() == -300) or (head.ycor() == 300):
             reset()
-
+            find_highscore(highscore, point_variables)
         move()
         
         # Kollision mit eigenen Snake-Koerper
-        for segment in bodysegments:
+        for segment in bodysegments[1:]:
             if segment.distance(head) < 20:
                 reset()
+                find_highscore(highscore, point_variables)
 
         # Fuer den sehr unwahrscheinlichen Fall, dass die Schlange die maximale Laenge erreicht von 49 * 29
         if len(bodysegments) >= 1421:
@@ -272,6 +335,7 @@ def start_snake():
             victory.shape(victory_label)
             victory.goto(0,100)
             window.ontimer(victory.hideturtle, 3000)
+            find_highscore(highscore, point_variables)
 
         time.sleep(delay)
 
