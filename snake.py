@@ -25,6 +25,11 @@ def start_snake():
     window.tracer(0)
 
     def snake_background():
+        """
+        Gekachelten Hintergrund generieren mit vielen Rechtecken.
+        Gerade Rechtecke werden dunkler. Die For-Schleife makiert 
+        das Rechteck, was zu fuellen ist, indem es dieses umrandet.
+        """
         grid = turtle.Turtle()
         grid.hideturtle()
         grid.penup()
@@ -51,10 +56,9 @@ def start_snake():
     snake_background()
 
     # Punkte
-    point_variables = {
-                    "count": 0,
-                    }
+    point_variables = {"count": 0,}
 
+    # Der Text "Punkte: " wird oben links generiert.
     points = turtle.Turtle()
     points.hideturtle()
     points.penup()
@@ -62,6 +66,7 @@ def start_snake():
     points.color("white")
     points.write("Punkte: ", move=False, align="center", font=("Abaddon", 20, "bold"))
 
+    # Die Punkteanzahl wird erstmal auf "0" gesetzt und oben links hinter dem Doppelpunkt platziert.
     count_display = turtle.Turtle()
     count_display.hideturtle()
     count_display.penup()
@@ -69,8 +74,10 @@ def start_snake():
     count_display.color("white")
     count_display.write("0", move=False, align="center", font=("Abaddon", 20, "bold"))
 
+    # Die hoechste Punktzahl wird in einer Liste gespeichert, um vorherige und aktuelle Punktestaende zu vergleichen.
     highscore = collections.deque(maxlen=2)
 
+    # "Highscore: " wird oben recht hingeschrieben.
     highscore_label = turtle.Turtle()
     highscore_label.hideturtle()
     highscore_label.penup()
@@ -78,14 +85,21 @@ def start_snake():
     highscore_label.color("white")
     highscore_label.write("Highscore: ", move=False, align="center", font=("Abaddon", 20, "bold"))
 
-    highscore_display = turtle.Turtle()
-    highscore_display.hideturtle()
-    highscore_display.penup()
-    highscore_display.goto(380, 250)
-    highscore_display.color("white")
-    highscore_display.write("0", move=False, align="center", font=("Abaddon", 20, "bold"))
+    # Highscore wird erstmal auf "0" gesetzt.
+    highscore_points = turtle.Turtle()
+    highscore_points.hideturtle()
+    highscore_points.penup()
+    highscore_points.goto(380, 250)
+    highscore_points.color("white")
+    highscore_points.write("0", move=False, align="center", font=("Abaddon", 20, "bold"))
 
     def find_highscore(highscore, count):
+        """
+        Prozedur, um mit der Liste highscore und den count, also der Punkteanzahl,
+        den tatsächlichen Highscore zu ermitteln. count ist der aktuelle Punktestand
+        und highscore[1] der vorherige. Gibt es keinen vorherigen, dann wird nur der
+        count angehangen und als Highscore festgelegt. 
+        """
         highscore.append(point_variables["count"])
         if len(highscore) == 2:
             if highscore[0] < highscore[1]:
@@ -94,7 +108,18 @@ def start_snake():
             else:
                 highscore.pop()
 
+    def save_highscore(highscore):
+        """
+        Prozedur, um den Highscore abzuspeichern, indem man diesen in eine Textdatei einschreibt.
+        """
+        file = open("highscore_snake.txt", "w")
+        file.write(str(highscore))
+        file.close()
+
     def give_points(point_variables):
+        """
+        Prozedur, um den Punktestand zu erhoehen.
+        """
         point_variables["count"] += 1
         count_display.clear()
         count_display.write(point_variables["count"], move=False, align="center", font=("Abaddon", 20, "bold"))
@@ -235,34 +260,41 @@ def start_snake():
 
     # Spiel zuruecksetzen
     def reset():
-        if state["resetting"]:
+        """
+        Prozedur, um das Spielbrett zurueckzusetzten.
+        """
+        if state["resetting"]:  # Beugt Programmfehler vor mehrmals das Spiel zurueckzusetzen.
             return
         state["resetting"] = True
-        state["accepting_inputs"] = False
-        input_buffer.clear()
-        head.direction = "Stop"
+        state["accepting_inputs"] = False   # Stoppt die Aufnahme weiterer Eingaben, damit die Schlange sich nicht direkt bewegt nach "Reset"
+        input_buffer.clear()    # Loescht ehemalige Eingaben zur Bewegung
+        head.direction = "Stop" # Stoppt die Bewegung der Schlange
+        save_highscore(point_variables["count"])    # Traegt den Highscore in die Speicher-Textdatei ein
 
         def cleanup():
-            for segment in bodysegments:
+            """
+            Hilfsprozedur, um das Spielbrett aufzuräumen
+            """
+            for segment in bodysegments:    # Koerpersegmente werden weg bewegt, damit man sie nicht mehr sieht
                 segment.goto(2000, 2000)
-            bodysegments.clear()
+            bodysegments.clear()    # Dictionary der Koerpersegmente wird geleert
 
-            head.goto(0, 0)
+            head.goto(0, 0)         # Schlange wird zurueck auf 0,0 gebracht
             head.shape(head_up)
 
-            state["resetting"] = False
-            state["accepting_inputs"] = True
+            state["resetting"] = False  # Zuruecksetzen-Variable wird auf False gesetzt, um ein erneutes Zurücksetzen wieder zu erlauben
+            state["accepting_inputs"] = True # Bewegungseingaben sind wieder möglich
 
-            point_variables["count"] = 0
+            point_variables["count"] = 0    # Punktestand wird auf "0" gesetzt
             count_display.clear()
-            count_display.write("0", move=False, align="center", font=("Abaddon", 20, "bold"))
+            count_display.write("0", move=False, align="center", font=("Abaddon", 20, "bold"))  # Anzeige der Punkte zeigt wieder "0"
 
-            highscore_display.clear()
-            highscore_display.write(highscore[0], move=False, align="center", font=("Abaddon", 20, "bold"))
+            highscore_points.clear()
+            highscore_points.write(highscore[0], move=False, align="center", font=("Abaddon", 20, "bold"))  # Anzeige des Highscore ggf. auf aktuellen Stand gebracht
 
             
 
-        window.ontimer(cleanup, 1000)
+        window.ontimer(cleanup, 1000)   # Friert Fenster ein für eine Sekunde
 
     # Haupt Spielschleife
     running = True
@@ -277,6 +309,13 @@ def start_snake():
             if opposites.get(next_direction) != last_direction: # opposites.get statt opposites[next_direction], weil "Stop" kein Element ist
                 head.direction = next_direction
                 break
+
+        # Highscore vom Spieler anzeigen
+        if len(highscore) == 0: 
+            with open("highscore_snake.txt", "r") as file:  # Textdatei mit Highscore oeffnen und eingetragenen Highscore anzeigen - wenn vorhanden
+                highscore_player = file.read()
+                highscore_points.clear()
+                highscore_points.write(highscore_player, move=False, align="center", font=("Abaddon", 20, "bold"))
 
         # Apfel essen
         if head.distance(apple) < 20:
