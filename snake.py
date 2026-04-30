@@ -316,6 +316,7 @@ def start_snake():
                 highscore_player = file.read()
                 highscore_points.clear()
                 highscore_points.write(highscore_player, move=False, align="center", font=("Abaddon", 20, "bold"))
+                highscore_points.append(highscore_player)
 
         # Apfel essen
         if head.distance(apple) < 20:
