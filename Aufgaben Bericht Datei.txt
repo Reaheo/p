@@ -1,0 +1,19 @@
+Bericht zu Snake
+In vieler Hinsicht ist Snake ein einfach zu programmierendes Spiel. Die Aufgabe lag daher nicht daran das Grundlegende Spiel nachzustellen, sondern eine ausgearbeite, verfeinerte Version zu implementieren. Die Grundlegende Idee für Snake ist eine Schlange, 
+bestehend aus dem Kopf und dann den Körpersegmenten. Der Kopf diktiert die Bewegungsrichtung der Schlange. Das Turtle Modul von Python ist eine akzeptable Möglichkeit, um diese Grundlage zu implementieren. Dafür wird ein Turtle erstellt, welche den Kopf 
+repräsentiert. Dieser besitzt eine Form mit Farbe, eine, auf Null gesetzte, Geschwindigkeit und auch eine Größe. Wichtig für die Bewegung ist die Richtungsvariable, die der Kopf besitzt. Mithilfe dieser kann eine Bewegungsmethode geschrieben werden. Es nutzt 
+die Richtung des Kopfes und bewegt den Kopf Längeneinheit für Längeneinheit entlang dieser Richtung. Eine Längeneinheit entspricht bei diesem Programm 20px. Soweit so einfach. Als letztes muss nun Kollisionen ermöglicht werden. Das Essen von Äpfel, die Kollision
+mit dem Rand und mit dem eigenen Körper folgen dem gleichem Prinzip. Ist der Abstand kleiner als eine Längeneinheit, also ist der Kopf auf dem Feld des Apfels bzw. Körpersegments bzw. außerhalb des Spielbretts, dann kann eine Kollision festgestellt werden und 
+entsprechend reagiert werden. Dies ist die Grundlage von Snake erfüllt. 
+
+Als nächstes kann man einige Fehler ausbessern. Die Bewegung rein aus Kopf-Ausrichtung und Bewegung entlang dieser, kann zu einer 180° Drehung auf einem Feld, also gleichen Zeile bzw. Spalte 
+geschehen. Das liegt an der Spielschleife. Animationen ansich sind auf dem Bildschirm angehalten. Durch die Spielschleife wird der Bildschirm immer nach 0.1s aufgefrischt. So können Änderungen auf dem Spielbrett stattfinden. Aber der Pythoncode muss sich nicht 
+an die 0.1s Pausen halten. In der Bewegungsmethode wird durch eine einfache wenn-Bedingung die Drehung um 180° verhindert, indem man sagt, dass wenn die vorherige Richtung entgegengesetzt war, diese Richtung nicht möglich ist. Beispielsweise wäre Down die 
+entgegengesetzte Richtung von Up, also für wenn die Richtung im Moment Up ist, kein Down als Bewegungseingabe erlaubt werden. Durch Drücken von Up, Left, Down in schneller Abfolge kann dies umgangen werden, weil sich hier in der 0.1s Pause, die Richtung des Kopfes
+auf Left ändert, sich die Bewegung noch nicht realisiert, und dann zu Down verändert wird, wodurch beim update des Bildschirm, die Richtung des Kopfes Down sein kann. Eine Lösung für dieses Problem ist die Richtungseingaben zu speichern in einem Input-Buffer.
+Aus diesem Dictionary werden die Bewegungsanweisung entnommen und ausgeführt. Sie werden eine Anweisung pro Bildschirmupdate ausgeführt, so verhindert man die 180° Drehung. Außerdem sind so knappe Kanten und Lücken einfacher zu bewältigen, weil man nicht genau in 
+den 0.1s eingeben muss.
+
+Nachdem das Drehungsproblem beseitigt wurde, musste man die durch diese Methode folgenden Probleme beseitigen. Bei Kollision mit dem Rand oder eigenen Körper verliert man das Spiel. Man wird dann eingefroren und danach auf Position 0 zurückgesetzt. Bisherige 
+Körpersegmente werden gelöscht. In dieser Zeit werden immernoch Bewegungseingaben gespeichert und die bereits existierenden Inputs werden auch beibehalten. So ergibt sich das Problem, dass nach einem Reset, die Schlange direkt anfängt sich zu bewegen und der Nutzer
+nicht entscheiden kann, wann er mit der nächsten Runge anfängt. Die Lösung hierfür, die ich nutzte, war den Prozess des Spielzurücksetzens zu verändern. Bisher war es so, dass es keine Funktion für den Reset gibt. Der Bild
