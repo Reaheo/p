@@ -414,9 +414,6 @@ def start_snake():
             running = False
             window.bye()
 
-
-
-
         window.listen()
         window.onkeypress(beenden, "Escape")
 
