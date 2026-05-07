@@ -1,7 +1,13 @@
-import turtle # Modul fuer die Grafik
+import turtle
 import random
 import time
-import collections # Zum Erstellen eines Input-Buffer, wo sich Eingaben gemerkt werden für ein besseres Spielgefuehl
+import collections
+
+"""
+Highscore wird in "highscore_snake.txt" gespeichert. 
+In der Funktion save_highscore wird der ehemalige Eintrag ueberschrieben.
+(Ist auf Linie 116 zu finden)
+"""
 
 def start_snake():
     """
@@ -17,12 +23,13 @@ def start_snake():
     # Geschwindigkeit
     delay = 0.1
 
-    # Bildschirm für das Snake-Game
+    # Bildschirm fuer das Snake-Game
     window = turtle.Screen()
     window.colormode(255)
-    window.bgcolor(80,230,120)
-    window.setup(width=1000, height=600)
+    window.bgcolor(43, 33, 46)
+    window.setup(width=1.0, height=1.0)
     window.tracer(0)
+    window.title("Snake")
 
     def snake_background():
         """
@@ -62,7 +69,7 @@ def start_snake():
     points = turtle.Turtle()
     points.hideturtle()
     points.penup()
-    points.goto(-350, 250)
+    points.goto(-350, 330)
     points.color("white")
     points.write("Punkte: ", move=False, align="center", font=("Abaddon", 20, "bold"))
 
@@ -70,7 +77,7 @@ def start_snake():
     count_display = turtle.Turtle()
     count_display.hideturtle()
     count_display.penup()
-    count_display.goto(-290, 250)
+    count_display.goto(-290, 330)
     count_display.color("white")
     count_display.write("0", move=False, align="center", font=("Abaddon", 20, "bold"))
 
@@ -81,7 +88,7 @@ def start_snake():
     highscore_label = turtle.Turtle()
     highscore_label.hideturtle()
     highscore_label.penup()
-    highscore_label.goto(290, 250)
+    highscore_label.goto(290, 330)
     highscore_label.color("white")
     highscore_label.write("Highscore: ", move=False, align="center", font=("Abaddon", 20, "bold"))
 
@@ -89,7 +96,7 @@ def start_snake():
     highscore_points = turtle.Turtle()
     highscore_points.hideturtle()
     highscore_points.penup()
-    highscore_points.goto(380, 250)
+    highscore_points.goto(380, 330)
     highscore_points.color("white")
     highscore_points.write("0", move=False, align="center", font=("Abaddon", 20, "bold"))
 
@@ -292,9 +299,24 @@ def start_snake():
             highscore_points.clear()
             highscore_points.write(highscore[0], move=False, align="center", font=("Abaddon", 20, "bold"))  # Anzeige des Highscore ggf. auf aktuellen Stand gebracht
 
-            
-
         window.ontimer(cleanup, 1000)   # Friert Fenster ein für eine Sekunde
+
+    def step_back():
+        """
+        Prozedur für die Kollision mit dem Rand. Wenn der Kopf das Spielfeld verlaesst
+        und mit dem Rand kollidiert, wird er zurueckgesetzt auf das Feld vorher. So
+        ist er auf dem Spielbrett und nicht komplett außerhalb.
+        Es checkt die Richtung der letzten Bewegung und setzt die Position des 
+        Schlangenkopfes entgegen dieser Richtung, um eine 1 LE, also 20px.
+        """
+        if head.direction == "up":
+            head.sety(head.ycor() - 20)
+        if head.direction == "down":
+            head.sety(head.ycor() + 20)
+        if head.direction == "right":
+            head.setx(head.xcor() - 20)
+        if head.direction == "left":
+            head.setx(head.xcor() + 20)
 
     # Haupt Spielschleife
     running = True
@@ -322,9 +344,9 @@ def start_snake():
             give_points(point_variables)
             while True:
                 # Wenn der Abstand vom Apfel weniger ist als ein Kaestchen, dann wird dieser gegessen
-                apple.goto(random.randint(-24,24)*20,random.randint(-14,14)*20)
+                apple.goto(random.randint(-24,25)*20,random.randint(-14,15)*20)
                 if not any(apple.position() == segment.position() for segment in bodysegments):
-                    apple.goto(random.randint(-24,24)*20,random.randint(-14,14)*20)
+                    apple.goto(random.randint(-24,25)*20,random.randint(-14,15)*20)
                     break
 
             # Die Schlange wird laenger durch das Essen eines Apfels
@@ -354,7 +376,8 @@ def start_snake():
             bodysegments[0].goto(x,y)
 
         # Kollision mit Rand
-        if (head.xcor() == -500) or (head.xcor() == 500) or (head.ycor() == -300) or (head.ycor() == 300):
+        if (head.xcor() == -520) or (head.xcor() == 540) or (head.ycor() == -320) or (head.ycor() == 340):
+            step_back()
             reset()
             find_highscore(highscore, point_variables)
         move()
@@ -379,9 +402,20 @@ def start_snake():
         time.sleep(delay)
 
         def beenden():
+            """
+            Prozedur, um das Spiel und Fenster fuer Snake zu schliessen. Es setzt den Highscore wieder auf 0, damit im naesten Spielverlauf 
+            sich der Highscore nicht erniedrigen kann.
+            """
+            file = open("highscore_snake.txt", "w")
+            file.write(str(0))
+            file.close()
+
             nonlocal running
             running = False
             window.bye()
+
+
+
 
         window.listen()
         window.onkeypress(beenden, "Escape")
