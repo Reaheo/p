@@ -3,6 +3,12 @@ import random
 import time
 import collections # Zum Erstellen eines Input-Buffer, wo sich Eingaben gemerkt werden für ein besseres Spielgefuehl
 
+"""
+Highscore wird in "highscore_snake.txt" gespeichert. 
+In der Funktion save_highscore wird der ehemalige Eintrag ueberschrieben.
+(Ist auf Linie 116 zu finden)
+"""
+
 def start_snake():
     """
     Startet das Snake-Game, indem die Hauptschleife des Spiels aufgerufen wird.
@@ -316,7 +322,6 @@ def start_snake():
                 highscore_player = file.read()
                 highscore_points.clear()
                 highscore_points.write(highscore_player, move=False, align="center", font=("Abaddon", 20, "bold"))
-                highscore_points.append(highscore_player)
 
         # Apfel essen
         if head.distance(apple) < 20:
@@ -380,9 +385,20 @@ def start_snake():
         time.sleep(delay)
 
         def beenden():
+            """
+            Prozedur, um das Spiel und Fenster fuer Snake zu schliessen. Es setzt den Highscore wieder auf 0, damit im naesten Spielverlauf 
+            sich der Highscore nicht erniedrigen kann.
+            """
+            file = open("highscore_snake.txt", "w")
+            file.write(str(0))
+            file.close()
+
             nonlocal running
             running = False
             window.bye()
+
+
+
 
         window.listen()
         window.onkeypress(beenden, "Escape")
